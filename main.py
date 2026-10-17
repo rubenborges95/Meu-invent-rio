@@ -77,7 +77,7 @@ with aba_inventario:
                 alerta_status = f"🟢 Disponível ({qtd} unid.)"
                 
             with st.container(border=True):
-                col_info, col_menos, col_mais = st.columns()
+                col_info, col_menos, col_mais = st.columns(3)
                 
                 with col_info:
                     st.markdown(f"**{nome}**")
