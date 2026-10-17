@@ -16,7 +16,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 def ligar_bd():
-    # Cria a base de dados local no servidor cloud de forma automática
     return sqlite3.connect("inventario_central.db")
 
 def inicializar_bd():
@@ -78,7 +77,7 @@ with aba_inventario:
                 alerta_status = f"🟢 Disponível ({qtd} unid.)"
                 
             with st.container(border=True):
-                col_info, col_menos, col_mais = st.columns([2, 1, 1])
+                col_info, col_menos, col_mais = st.columns()
                 
                 with col_info:
                     st.markdown(f"**{nome}**")
@@ -141,13 +140,43 @@ with aba_registo:
             else:
                 st.warning("Preenche o nome do material.")
 
-# --- ABA 3: HISTÓRICO ---
+# --- ABA 3: HISTÓRICO E APAGAR ---
 with aba_historico:
-    st.subheader(" Relatório de Movimentações")
+    st.subheader("📋 Relatório de Movimentações")
     conn = ligar_bd()
     try:
         df_hist = pd.read_sql_query("SELECT data_hora as 'Data/Hora', material as 'Material', tipo_acao as 'Ação', quantidade_alterada as 'Qtd Mod.', quantidade_final as 'Stock Final' FROM historico ORDER BY id DESC LIMIT 50", conn)
         st.dataframe(df_hist, use_container_width=True, hide_index=True)
     except:
         st.info("Sem histórico registado.")
+    
+    st.markdown("---")
+    st.subheader("🗑️ Abater / Apagar Material do Sistema")
+    
+    # Criar uma lista com os materiais existentes para o utilizador escolher qual apagar
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, nome FROM materiais")
+    lista_produtos = cursor.fetchall()
     conn.close()
+    
+    if not lista_produtos:
+        st.caption("Não há materiais para eliminar.")
+    else:
+        # Formatar a lista para o menu de escolha
+        opcoes = {p[1]: p[0] for p in lista_produtos}
+        produto_selecionado = st.selectbox("Selecione o material que deseja apagar permanentemente:", list(opcoes.keys()))
+        
+        if st.button("🗑️ APAGAR PRODUTO SELECIONADO", type="primary"):
+            id_eliminar = opcoes[produto_selecionado]
+            conn = ligar_bd()
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM materiais WHERE id = ?", (id_eliminar,))
+            
+            # Registar o abate no histórico
+            agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            cursor.execute("INSERT INTO historico (data_hora, material, tipo_acao, quantidade_alterada, quantidade_final) VALUES (?, ?, 'Abate Total', 0, 0)", (agora, produto_selecionado))
+            
+            conn.commit()
+            conn.close()
+            st.success(f"'{produto_selecionado}' foi removido do inventário!")
+            st.rerun()
