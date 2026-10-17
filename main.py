@@ -44,10 +44,18 @@ def inicializar_bd():
     conn.close()
 
 inicializar_bd()
-st.image("WhatsApp Image 2026-10-11 at 14.58.23.jpeg", width=120)
 
-st.title("🚨 GESTÃO DE STOCK PRÉ-HOSPITALAR")
-st.caption("Central de Controlo de Material Médico - Ambulância")
+# --- NOVO BLOCO DO TOPO: EMBLEMA + TEXTO LADO A LADO ---
+col_logo, col_titulo = st.columns([1, 3])
+
+with col_logo:
+    st.image("WhatsApp Image 2026-10-11 at 14.58.23.jpeg", width=90)
+
+with col_titulo:
+    st.markdown("<h3 style='margin-top: 15px; color: #f1c40f; font-family: Arial, sans-serif;'>A.H. Bombeiros Voluntários Carrazedo de Montenegro</h3>", unsafe_allow_html=True)
+
+st.caption("Central de Controlo de Material Médico - Viatura")
+# ------------------------------------------------------
 
 aba_inventario, aba_registo, aba_historico = st.tabs(["📦 Inventário Ativo", "➕ Registar Novo", "📋 Ocorrências"])
 
@@ -78,7 +86,7 @@ with aba_inventario:
                 alerta_status = f"🟢 Disponível ({qtd} unid.)"
                 
             with st.container(border=True):
-                col_info, col_menos, col_mais = st.columns(3)
+                col_info, col_menos, col_mais = st.columns([2, 1, 1])
                 
                 with col_info:
                     st.markdown(f"**{nome}**")
@@ -143,7 +151,7 @@ with aba_registo:
 
 # --- ABA 3: HISTÓRICO E APAGAR ---
 with aba_historico:
-    st.subheader("📋 Relatório de Movimentações")
+    st.subheader(" Relatório de Movimentações")
     conn = ligar_bd()
     try:
         df_hist = pd.read_sql_query("SELECT data_hora as 'Data/Hora', material as 'Material', tipo_acao as 'Ação', quantidade_alterada as 'Qtd Mod.', quantidade_final as 'Stock Final' FROM historico ORDER BY id DESC LIMIT 50", conn)
@@ -154,7 +162,6 @@ with aba_historico:
     st.markdown("---")
     st.subheader("🗑️ Abater / Apagar Material do Sistema")
     
-    # Criar uma lista com os materiais existentes para o utilizador escolher qual apagar
     cursor = conn.cursor()
     cursor.execute("SELECT id, nome FROM materiais")
     lista_produtos = cursor.fetchall()
@@ -163,8 +170,7 @@ with aba_historico:
     if not lista_produtos:
         st.caption("Não há materiais para eliminar.")
     else:
-        # Formatar a lista para o menu de escolha
-        opcoes = {p[1]: p[0] for p in lista_produtos}
+        opcoes = {p: p for p in lista_produtos}
         produto_selecionado = st.selectbox("Selecione o material que deseja apagar permanentemente:", list(opcoes.keys()))
         
         if st.button("🗑️ APAGAR PRODUTO SELECIONADO", type="primary"):
@@ -172,11 +178,8 @@ with aba_historico:
             conn = ligar_bd()
             cursor = conn.cursor()
             cursor.execute("DELETE FROM materiais WHERE id = ?", (id_eliminar,))
-            
-            # Registar o abate no histórico
             agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             cursor.execute("INSERT INTO historico (data_hora, material, tipo_acao, quantidade_alterada, quantidade_final) VALUES (?, ?, 'Abate Total', 0, 0)", (agora, produto_selecionado))
-            
             conn.commit()
             conn.close()
             st.success(f"'{produto_selecionado}' foi removido do inventário!")
