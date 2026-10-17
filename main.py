@@ -54,7 +54,7 @@ with col_logo:
 with col_titulo:
     st.markdown("<h3 style='margin-top: 15px; color: #f1c40f; font-family: Arial, sans-serif;'>A.H. Bombeiros Voluntários Carrazedo de Montenegro</h3>", unsafe_allow_html=True)
 
-st.caption("Central de Controlo de Material Médico - Viatura")
+st.caption("Gestão de Stock Material Pré-Hospitalar")
 # ------------------------------------------------------
 
 aba_inventario, aba_registo, aba_historico = st.tabs(["📦 Inventário Ativo", "➕ Registar Novo", "📋 Ocorrências"])
