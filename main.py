@@ -174,7 +174,7 @@ with aba_historico:
         produto_selecionado = st.selectbox("Selecione o material que deseja apagar permanentemente:", list(opcoes.keys()))
         
         if st.button("🗑️ APAGAR PRODUTO SELECIONADO", type="primary"):
-            id_eliminar = opcoes[produto_selecionado]
+            id_eliminar = opcoes[produto_selecionado][0]
             conn = ligar_bd()
             cursor = conn.cursor()
             cursor.execute("DELETE FROM materiais WHERE id = ?", (id_eliminar,))
