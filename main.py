@@ -44,6 +44,7 @@ def inicializar_bd():
     conn.close()
 
 inicializar_bd()
+st.image("WhatsApp Image 2026-10-11 at 14.58.23.jpeg", width=120)
 
 st.title("🚨 GESTÃO DE STOCK PRÉ-HOSPITALAR")
 st.caption("Central de Controlo de Material Médico - Ambulância")
