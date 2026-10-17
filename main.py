@@ -65,7 +65,7 @@ with aba_inventario:
     
     conn = ligar_bd()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, nome, quantidade, limite_minimo, categoria FROM materiais")
+    cursor.execute("SELECT id, nome, quantity, limite_minimo, categoria FROM materiais" if False else "SELECT id, nome, quantidade, limite_minimo, categoria FROM materiais")
     todos_materiais = cursor.fetchall()
     conn.close()
     
@@ -174,14 +174,22 @@ with aba_historico:
         produto_selecionado = st.selectbox("Selecione o material que deseja apagar permanentemente:", list(opcoes.keys()))
         
         if st.button("🗑️ APAGAR PRODUTO SELECIONADO", type="primary"):
+            # Extrai dinamicamente o ID (número) e o Nome (texto) do par selecionado
             id_eliminar = opcoes[produto_selecionado][0]
+            nome_produto = opcoes[produto_selecionado][1]
+            
             conn = ligar_bd()
             cursor = conn.cursor()
+            
+            # Apaga o material correto usando o ID numérico
             cursor.execute("DELETE FROM materiais WHERE id = ?", (id_eliminar,))
+            
+            # Regista a ação com o texto do nome do produto no histórico
             agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            cursor.execute("INSERT INTO historico (data_hora, material, tipo_acao, quantidade_alterada, quantidade_final) VALUES (?, ?, 'Abate Total', 0, 0)", (agora, produto_selecionado))
+            cursor.execute("INSERT INTO historico (data_hora, material, tipo_acao, quantidade_alterada, quantidade_final) VALUES (?, ?, 'Abate Total', 0, 0)", (agora, nome_produto))
 
             conn.commit()
             conn.close()
-            st.success(f"'{produto_selecionado}' foi removido do inventário!")
+            
+            st.success(f"'{nome_produto}' foi removido do inventário!")
             st.rerun()
