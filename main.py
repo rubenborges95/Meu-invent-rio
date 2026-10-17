@@ -180,6 +180,7 @@ with aba_historico:
             cursor.execute("DELETE FROM materiais WHERE id = ?", (id_eliminar,))
             agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             cursor.execute("INSERT INTO historico (data_hora, material, tipo_acao, quantidade_alterada, quantidade_final) VALUES (?, ?, 'Abate Total', 0, 0)", (agora, produto_selecionado))
+
             conn.commit()
             conn.close()
             st.success(f"'{produto_selecionado}' foi removido do inventário!")
