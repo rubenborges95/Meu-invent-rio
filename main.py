@@ -20,40 +20,37 @@ st.markdown(
 
 @st.cache_resource
 def obter_cliente_gsheets():
+    import json
+    import os
     import gspread
-    import re
     from google.oauth2.service_account import Credentials
     
     try:
-        if "gcp_service_account" not in st.secrets:
-            st.error("Las credenciales 'gcp_service_account' no están configuradas en los Secrets de Streamlit.")
+        diretorio_atual = os.path.dirname(os.path.abspath(__file__))
+        caminho_json = os.path.join(diretorio_atual, "credentials.json")
+        
+        if not os.path.exists(caminho_json):
+            st.error(f"Ficheiro 'credentials.json' não encontrado na pasta do projeto.")
             return None
             
-        secrets_dict = dict(st.secrets["gcp_service_account"])
-        
-        if "private_key" in secrets_dict:
-            pk = str(secrets_dict["private_key"])
+        with open(caminho_json, "r", encoding="utf-8") as f:
+            creds_dict = json.load(f)
+            
+        # Limpa e formata a chave privada de forma automática
+        if "private_key" in creds_dict:
+            pk = creds_dict["private_key"]
             pk = pk.replace("\\\\n", "\n").replace("\\n", "\n")
+            creds_dict["private_key"] = pk
             
-            # Limpieza y reconstrucción total del formato PEM por código
-            match = re.search(r"-----BEGIN PRIVATE KEY-----(.*?)-----END PRIVATE KEY-----", pk, re.DOTALL)
-            if match:
-                body = match.group(1)
-                body_clean = "".join(body.split())
-                chunks = [body_clean[i:i+64] for i in range(0, len(body_clean), 64)]
-                pk = "-----BEGIN PRIVATE KEY-----\n" + "\n".join(chunks) + "\n-----END PRIVATE KEY-----\n"
-            
-            secrets_dict["private_key"] = pk
-        
         escopos = [
             "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive"
         ]
         
-        creds = Credentials.from_service_account_info(secrets_dict, scopes=escopos)
+        creds = Credentials.from_service_account_info(creds_dict, scopes=escopos)
         return gspread.authorize(creds)
     except Exception as e:
-        st.error(f"Error crítico en la autenticación de Google: {e}")
+        st.error(f"Erro na autenticação: {e}")
         return None
 
 def carregar_dados_seguro():
