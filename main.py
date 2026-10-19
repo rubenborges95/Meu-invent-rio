@@ -20,40 +20,52 @@ st.markdown(
 
 @st.cache_resource
 def obter_cliente_gsheets():
-    import json
-    import os
-    import re
     import gspread
     from google.oauth2.service_account import Credentials
     
     try:
-        diretorio_atual = os.path.dirname(os.path.abspath(__file__))
-        caminho_json = os.path.join(diretorio_atual, "credentials.json")
+        # Credenciais embutidas diretamente para eliminar qualquer erro de ficheiro ou formato
+        creds_dict = {
+            "type": "service_account",
+            "project_id": "stock-bombeiros",
+            "private_key_id": "49a9cb69e6dbe5a35457c9d2dc8c70d218e2a3a2",
+            "private_key": """-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDNpPMMsrUpidl4
+nEtOzaCWO8Jh5qil9kAU5JHfLs5RmqLIOvAof3WKeIuHkQWyRkZAghbi+0ktyTAx
+wLgWF/lcFBAz0HtF3IIURnWp2W2xpgA/qosSiJ6MUg9ZIQ0qKQzOxdX6+vUNG2M1
+ITq16sSlGgb4Sz0IDHiOneWfMtc77pKzi9eIqkKe3CWGzK+y47TCfKwadybBT0Ih
+V6OYbBCthHO9VldUJsAX1djrT8ePFj6D34Pdjb+rAxV9h6hxUT6pnYdhO2RDFRaE
+cOJAN7sMcRA2ru/OqLKBXcBwMZ9SOplQZ0xEQMbUiKCSEXsEdhskksXCvLfgu97i
+qOHFsXaVAgMBAAECggEAIgIDR7hOCV6Ink+KjK+ovO+JB9OzVC7TDiF2ligRaqFe
+BirpCGl7sLiaqoKrJH5Go+hfjI3t3iqFU9UBHHY+gKG4xDjYCgebY2r7jmksoNJI
+/D5h3WDGh4ISk7TJjo1XVuKUrnrOB6rdzy19nhQDDSKuwGUA5NHbJgqqrJclzP0t
+JCeezGResAGls+5PFJq+RqiQ8ZmLt7OxPzsbXAdjocajUVtlpyQ8H4IO2l3TRon7
+GyH5ldXoBS3MO06h6v87XjcpqyrM3oyqgASyR7OcmfTjjieRQUL3J8kelfzTpzgw
+HLLgGcpsGMDDeNjvEVHy5LZnDoRkLPa40+JV69WISQKBgQD2fIMl9O7/EsemGmKq
+zvjNtj90LCcY/JBhm0CJrIG6FmBlxnmSH3MMokzkaIiYyf31m+XlwdUZyur/jLLX
+ypoX4b38QCwIYLpgmQ1lHDxhz2aRJv4VWnnv+IfgMPcN6Fi4uSFg4eLDBh6EXYHg
+SUskyuTLDCESQEPr/jRO6XIvWwKBgQDVlOJbyWrJX2HKjASpsXfZdNvE8SK35t4g
+2C/jkT3qeZvVFgZRmA2GHRhe72qxYhhLDY2zp51MeCry6K93L2d+hUw/iRLyybSV
+9+EYmhZdByadymiisI07gF9u+9RYuRwMCCf/NbZDmfTaK9vmpEdxlkJqpzhskyAV
+yhE65KtEzwKBgQCcW23CVTaKffpB5vjyC2sO624jHqMKmaRpFlgBPXnpdqpdxWJ3
+DBYqTIZkWd9UtMWx2NwkPCoXO36I71K/ypinT5759ic4hUuVXWF+40N2dF9G8qo5
+F3TEgi6HS+hcXShyvZVr5L65IheXtc1eXoAZbc9m8mHENxofCNlbuYCigwKBgQCY
+iB+wlYQiFHBuiti5p/iD4KUjXWMCG2r/4eUxjIS/c+IKqBQTKZhe82B4TFvSGtBm
+nqWNNrqLz/c4OdIb7g2tSPDhcF7Tkl5DUmZa0TzcxcO3vOqLHrXbvy5pcVJUuV+Tj
+4t9NsDpexRDMzw3ZBfHP+ROtv4bYY6pCZXEwsiZumQKBgGjsiHH8GjHvVQpy+F/4
+rQwJEKs1uRO3FBPHxt2LpHKG7Oo33uJFnw819q/0QCmoQ7PHwy7msADwjdz633+b
+SMY/skfDTvzOMci2FiAu/IEiC/1PpADhSGxbr7ORHE9NTqgklxqUz6FIQ0r4CYpx
+0/+K/mhhqw/6C/YHvojjMR9m
+-----END PRIVATE KEY-----""",
+            "client_email": "bombeiros-app@stock-bombeiros.iam.gserviceaccount.com",
+            "client_id": "102395152982852761363",
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/bombeiros-app%40stock-bombeiros.iam.gserviceaccount.com",
+            "universe_domain": "googleapis.com"
+        }
         
-        if not os.path.exists(caminho_json):
-            st.error(f"Ficheiro 'credentials.json' não encontrado na pasta do projeto.")
-            return None
-            
-        with open(caminho_json, "r", encoding="utf-8") as f:
-            creds_dict = json.load(f)
-            
-        # Tratamento blindado para qualquer tipo de quebra de linha (literal ou real)
-        if "private_key" in creds_dict:
-            pk = str(creds_dict["private_key"])
-            
-            # Substitui todas as variações possíveis de \n por espaço para limparmos o miolo
-            pk = pk.replace("\\\\n", "\n").replace("\\n", "\n")
-            
-            # Extrai o conteúdo entre o início e o fim da chave PEM
-            match = re.search(r"-----BEGIN PRIVATE KEY-----(.*?)-----END PRIVATE KEY-----", pk, re.DOTALL)
-            if match:
-                corpo = match.group(1)
-                # Remove todos os espaços e quebras indesejadas
-                corpo_limpo = "".join(corpo.split())
-                # Reconstrói a chave limpa em blocos exatos de 64 caracteres
-                linhas = [corpo_limpo[i:i+64] for i in range(0, len(corpo_limpo), 64)]
-                creds_dict["private_key"] = "-----BEGIN PRIVATE KEY-----\n" + "\n".join(linhas) + "\n-----END PRIVATE KEY-----\n"
-            
         escopos = [
             "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive"
