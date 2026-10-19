@@ -21,25 +21,27 @@ st.markdown(
 @st.cache_resource
 def obter_cliente_gsheets():
     import gspread
+    import re
     from google.oauth2.service_account import Credentials
     
     try:
         if "gcp_service_account" not in st.secrets:
-            st.error("As credenciais 'gcp_service_account' não estão configuradas nos Secrets do Streamlit.")
+            st.error("Las credenciales 'gcp_service_account' no están configuradas en los Secrets de Streamlit.")
             return None
             
         secrets_dict = dict(st.secrets["gcp_service_account"])
         
         if "private_key" in secrets_dict:
             pk = str(secrets_dict["private_key"])
-            pk = pk.replace("\\n", "\n")
+            pk = pk.replace("\\\\n", "\n").replace("\\n", "\n")
             
-            # Se a chave perdeu as quebras de linha e ficou numa linha única, reconstruímos o PEM
-            if "-----BEGIN PRIVATE KEY-----" in pk and "-----END PRIVATE KEY-----" in pk:
-                corpo = pk.replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "")
-                corpo = "".join(corpo.split())  # Remove espaços e quebras inválidas
-                linhas_corpo = [corpo[i:i+64] for i in range(0, len(corpo), 64)]
-                pk = "-----BEGIN PRIVATE KEY-----\n" + "\n".join(linhas_corpo) + "\n-----END PRIVATE KEY-----\n"
+            # Limpieza y reconstrucción total del formato PEM por código
+            match = re.search(r"-----BEGIN PRIVATE KEY-----(.*?)-----END PRIVATE KEY-----", pk, re.DOTALL)
+            if match:
+                body = match.group(1)
+                body_clean = "".join(body.split())
+                chunks = [body_clean[i:i+64] for i in range(0, len(body_clean), 64)]
+                pk = "-----BEGIN PRIVATE KEY-----\n" + "\n".join(chunks) + "\n-----END PRIVATE KEY-----\n"
             
             secrets_dict["private_key"] = pk
         
@@ -51,9 +53,8 @@ def obter_cliente_gsheets():
         creds = Credentials.from_service_account_info(secrets_dict, scopes=escopos)
         return gspread.authorize(creds)
     except Exception as e:
-        st.error(f"Erro crítico na autenticação Google: {e}")
+        st.error(f"Error crítico en la autenticación de Google: {e}")
         return None
-
 
 def carregar_dados_seguro():
     try:
