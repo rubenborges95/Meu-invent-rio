@@ -21,7 +21,6 @@ st.markdown(
 
 @st.cache_resource
 def obter_cliente_gsheets():
-  import gsession  # type: ignore
   import gspread
 
   try:
