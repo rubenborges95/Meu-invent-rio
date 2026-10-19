@@ -1,7 +1,6 @@
 from datetime import datetime
 import pandas as pd
 import streamlit as st
-from st_gsheets_connection import GSheetsConnection
 
 # Configuração da página para telemóvel e tema escuro
 st.set_page_config(page_title="AMBULANCE LOG", page_icon="🚑", layout="centered")
@@ -18,8 +17,8 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Estabelecer ligação ao Google Sheets
-conn = st.connection("gsheets", type=GSheetsConnection)
+# Estabelecer ligação ao Google Sheets (sem precisar de imports externos)
+conn = st.connection("gsheets")
 
 
 # Funções para ler e escrever no Google Sheets
