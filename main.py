@@ -17,8 +17,13 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Estabelecer ligação ao Google Sheets (sem precisar de imports externos)
-conn = st.connection("gsheets")
+# === LIGAÇÃO DIRETA AO GOOGLE SHEETS (COLOCA O TEU LINK ENTRE AS ASPAS) ===
+SPREADSHEET_URL = (
+    "https://docs.google.com/spreadsheets/d/1cxL--ifJ-2GGWeNfUA2k-g0TLb0VdPfzGQ-i6UJrYiA/edit?gid=0#gid=0"
+)
+
+# Estabelecer ligação segura ao Google Sheets
+conn = st.connection("gsheets", type="gsheets", url=SPREADSHEET_URL)
 
 
 # Funções para ler e escrever no Google Sheets
