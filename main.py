@@ -18,7 +18,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-
 @st.cache_resource
 def obter_cliente_gsheets():
     import json
@@ -29,13 +28,17 @@ def obter_cliente_gsheets():
         diretorio_atual = os.path.dirname(os.path.abspath(__file__))
         caminho_json = os.path.join(diretorio_atual, "credentials.json")
         if not os.path.exists(caminho_json):
+            st.error(f"Ficheiro 'credentials.json' não encontrado em: {caminho_json}")
             return None
             
         with open(caminho_json, "r", encoding="utf-8") as f:
             creds_dict = json.load(f)
             
         if "private_key" in creds_dict:
-            creds_dict["private_key"] = creds_dict["private_key"].replace("\\n", "\n")
+            # Corrige de forma universal qualquer tipo de quebra de linha corrompida
+            pk = creds_dict["private_key"]
+            pk = pk.replace("\\\\n", "\n").replace("\\n", "\n")
+            creds_dict["private_key"] = pk
             
         escopos = [
             "https://www.googleapis.com/auth/spreadsheets",
@@ -43,7 +46,8 @@ def obter_cliente_gsheets():
         ]
         creds = Credentials.from_service_account_info(creds_dict, scopes=escopos)
         return gspread.authorize(creds)
-    except Exception:
+    except Exception as e:
+        st.error(f"Erro detalhado na autenticação Google: {e}")
         return None
 
 
