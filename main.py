@@ -22,6 +22,7 @@ st.markdown(
 def obter_cliente_gsheets():
     import json
     import os
+    import re
     import gspread
     from google.oauth2.service_account import Credentials
     
@@ -36,11 +37,18 @@ def obter_cliente_gsheets():
         with open(caminho_json, "r", encoding="utf-8") as f:
             creds_dict = json.load(f)
             
-        # Limpa e formata a chave privada de forma automática
+        # Reconstrução total e blindada da chave privada para formato PEM válido
         if "private_key" in creds_dict:
-            pk = creds_dict["private_key"]
-            pk = pk.replace("\\\\n", "\n").replace("\\n", "\n")
-            creds_dict["private_key"] = pk
+            pk = str(creds_dict["private_key"])
+            match = re.search(r"-----BEGIN PRIVATE KEY-----(.*?)-----END PRIVATE KEY-----", pk, re.DOTALL)
+            if match:
+                corpo = match.group(1)
+                # Remove quaisquer espaços ou quebras inválidas antigas
+                corpo_limpo = "".join(corpo.split())
+                # Reorganiza exatamente em blocos de 64 carateres (padrão oficial PEM)
+                linhas = [corpo_limpo[i:i+64] for i in range(0, len(corpo_limpo), 64)]
+                pk_reconstruida = "-----BEGIN PRIVATE KEY-----\n" + "\n".join(linhas) + "\n-----END PRIVATE KEY-----\n"
+                creds_dict["private_key"] = pk_reconstruida
             
         escopos = [
             "https://www.googleapis.com/auth/spreadsheets",
