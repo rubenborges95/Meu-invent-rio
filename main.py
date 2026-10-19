@@ -1,32 +1,25 @@
 from datetime import datetime
-import gspread
 import pandas as pd
 import streamlit as st
+from st_gsheets_connection import GSheetsConnection
 
-# Configuração da página para telemóvel e tema escuro
 st.set_page_config(page_title="AMBULANCE LOG", page_icon="🚑", layout="centered")
 
-# Estilização do Tema Pré-Hospitalar (CSS)
-st.markdown(
-    """
-    <style>
-    .main { background-color: #11141a; }
-    h1 { color: #f1c40f !important; font-family: 'Arial', sans-serif; text-align: center; }
-    .stButton>button { width: 100%; font-weight: bold; border-radius: 8px; height: 45px; }
-    </style>
-""",
-    unsafe_allow_html=True,
-)
+st.write("A iniciar a aplicação...")
 
+try:
+  conn = st.connection("gsheets", type=GSheetsConnection)
+  st.write("Ligação ao Google Sheets estabelecida com sucesso!")
+except Exception as e:
+  st.error(f"Erro na ligação: {e}")
 
-# Função para estabelecer ligação ao Google Sheets via gspread e st.secrets
-def obter_conexao_gsheets():
-  # Lê o link dos secrets do Streamlit
-  url = st.secrets["connections"]["gsheets"]["spreadsheet"]
-  gc = gspread.service_account_from_dict(
-      dict(st.secrets["connections"]["gsheets"])
+try:
+  df_mat = conn.read(worksheet="materiais", ttl=0)
+  st.write("Dados de materiais lidos com sucesso:", df_mat)
+except Exception as e:
+  st.warning(
+      "Aviso: Não foi possível ler a aba 'materiais'. Verifica se ela existe"
+      f" na folha. Erro: {e}"
   )
-  # Se usares credenciais por JSON nos segredos, o gspread liga-se diretamente:
-  # Em alternativa, se a folha for aberta por link público com gspread:
-  # Para simplificar com o link do spreadsheet:
-  return gc.open_by_url(url)
+
+st.write("Se estás a ver esta mensagem, o código correu todo!")
