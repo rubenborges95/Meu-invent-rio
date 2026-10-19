@@ -1,7 +1,8 @@
 from datetime import datetime
+import os
+from gspread.exceptions import WorksheetNotFound
 import pandas as pd
 import streamlit as st
-from st_gsheets_connection import GSheetsConnection
 
 # Configuração da página
 st.set_page_config(page_title="AMBULANCE LOG", page_icon="🚑", layout="centered")
@@ -18,17 +19,67 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Ligar ao Google Sheets de forma segura
-try:
-  conn = st.connection("gsheets", type=GSheetsConnection)
-except Exception as e:
-  st.error(f"Erro na ligação ao Google Sheets: {e}")
+
+# Ligação direta e segura ao Google Sheets através dos Secrets
+@st.cache_resource
+def obter_cliente_gsheets():
+  import json
+  from google.oauth2.service_account import Credentials
+  import gspread
+
+  escopos = [
+      "https://www.googleapis.com/auth/spreadsheets",
+      "https://www.googleapis.com/auth/drive",
+  ]
+
+  # Lê as credenciais diretamente dos secrets do Streamlit Cloud
+  if "connections" in st.secrets and "gsheets" in st.secrets["connections"]:
+    sec = st.secrets["connections"]["gsheets"]
+    # Se estiver configurado como dicionário ou JSON de serviço
+    if "private_key" in sec:
+      cred_dict = dict(sec)
+      creds = Credentials.from_service_account_info(cred_dict, scopes=escopos)
+      cliente = gspread.authorize(creds)
+      return cliente
+
+  # Alternativa: tentar autenticar por toml direto
+  if "gcp_service_account" in st.secrets:
+    creds = Credentials.from_service_account_info(
+        dict(st.secrets["gcp_service_account"]), scopes=escopos
+    )
+    cliente = gspread.authorize(creds)
+    return cliente
+
+  return None
 
 
-# Funções de leitura e escrita seguras
+def abrir_tabela():
+  try:
+    cliente = obter_cliente_gsheets()
+    if not cliente:
+      return None
+    # Nome do documento ou link a partir dos secrets
+    url = st.secrets["connections"]["gsheets"].get("spreadsheet", "")
+    if "https://" in url:
+      sh = cliente.open_by_url(url)
+    else:
+      sh = cliente.open(url)
+    return sh
+  except Exception as e:
+    st.error(f"Erro ao abrir folha: {e}")
+    return None
+
+
 def carregar_materiais():
   try:
-    df = conn.read(worksheet="materiais", ttl=0)
+    sh = abrir_tabela()
+    if not sh:
+      return pd.DataFrame(
+          columns=["id", "nome", "quantidade", "categoria", "limite_minimo"]
+      )
+    ws = sh.worksheet("materiais")
+    dados = ws.get_all_records()
+    df = pd.DataFrame(dados)
     if df.empty or "id" not in df.columns:
       return pd.DataFrame(
           columns=["id", "nome", "quantidade", "categoria", "limite_minimo"]
@@ -38,7 +89,6 @@ def carregar_materiais():
     df["limite_minimo"] = df["limite_minimo"].astype(int)
     return df
   except Exception as e:
-    st.error(f"Erro ao ler materiais: {e}")
     return pd.DataFrame(
         columns=["id", "nome", "quantidade", "categoria", "limite_minimo"]
     )
@@ -46,14 +96,34 @@ def carregar_materiais():
 
 def guardar_materiais(df):
   try:
-    conn.update(worksheet="materiais", data=df)
+    sh = abrir_tabela()
+    if not sh:
+      return
+    ws = sh.worksheet("materiais")
+    ws.clear()
+    # Converte DataFrame para lista de listas incluindo cabeçalhos
+    dados_para_escrever = [df.columns.tolist()] + df.values.tolist()
+    ws.update(dados_para_escrever)
   except Exception as e:
     st.error(f"Erro ao guardar materiais: {e}")
 
 
 def carregar_historico():
   try:
-    df = conn.read(worksheet="historico", ttl=0)
+    sh = abrir_tabela()
+    if not sh:
+      return pd.DataFrame(
+          columns=[
+              "data_hora",
+              "material",
+              "tipo_acao",
+              "quantidade_alterada",
+              "quantidade_final",
+          ]
+      )
+    ws = sh.worksheet("historico")
+    dados = ws.get_all_records()
+    df = pd.DataFrame(dados)
     if df.empty:
       return pd.DataFrame(
           columns=[
@@ -79,19 +149,20 @@ def carregar_historico():
 
 def registar_historico(material, tipo_acao, qtd_alt, qtd_final):
   try:
-    df_hist = carregar_historico()
+    sh = abrir_tabela()
+    if not sh:
+      return
+    ws = sh.worksheet("historico")
     agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    novo_reg = pd.DataFrame([{
-        "data_hora": agora,
-        "material": material,
-        "tipo_acao": tipo_acao,
-        "quantidade_alterada": int(qtd_alt),
-        "quantidade_final": int(qtd_final),
-    }])
-    df_atualizado = pd.concat([df_hist, novo_reg], ignore_index=True)
-    conn.update(worksheet="historico", data=df_atualizado)
+    ws.append_row([
+        agora,
+        str(material),
+        str(tipo_acao),
+        int(qtd_alt),
+        int(qtd_final),
+    ])
   except Exception as e:
-    st.error(f"Erro ao registar histórico: {e}")
+    pass
 
 
 # --- Cabeçalho ---
