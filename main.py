@@ -28,7 +28,34 @@ def obter_cliente_gsheets():
             "type": "service_account",
             "project_id": "stock-bombeiros",
             "private_key_id": "49a9cb69e6dbe5a35457c9d2dc8c70d218e2a3a2",
-            "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDNpPMMsrUpidl4\nnEtOzaCWO8Jh5qil9kAU5JHfLs5RmqLIOvAof3WKeIuHkQWyRkZAghbi+0ktyTAx\nwLgWF/lcFBAz0HtF3IIURnWp2W2xpgA/qosSiJ6MUg9ZIQ0qKQzOxdX6+vUNG2M1\nITq16sSlGgb4Sz0IDHiOneWfMtc77pKzi9eIqkKe3CWGzK+y47TCfKwadybBT0Ih\nV6OYbBCthHO9VldUJsAX1djrT8ePFj6D34Pdjb+rAxV9h6hxUT6pnYdhO2RDFRaE\ncOJAN7sMcRA2ru/OqLKBXcBwMZ9SOplQZ0xEQMbUiKCSEXsEdhskksXCvLfgu97i\nqOHFsXaVAgMBAAECggEAIgIDR7hOCV6Ink+KjK+ovO+JB9OzVC7TDiF2ligRaqFe\nBirpCGl7sLiaqoKrJH5Go+hfjI3t3iqFU9UBHHY+gKG4xDjYCgebY2r7jmksoNJI\n/D5h3WDGh4ISk7TJjo1XVuKUrnrOB6rdzy19nhQDDSKuwGUA5NHbJgqqrJclzP0t\nJCeezGResAGls+5PFJq+RqiQ8ZmLt7OxPzsbXAdjocajUVtlpyQ8H4IO2l3TRon7\nGyH5ldXoBS3MO06h6v87XjcpqyrM3oyqgASyR7OcmfTjjieRQUL3J8kelfzTpzgw\nHLLgGcpsGMDDeNjvEVHy5LZnDoRkLPa40+JV69WISQKBgQD2fIMl9O7/EsemGmKq\nzvjNtj90LCcY/JBhm0CJrIG6FmBlxnmSH3MMokzkaIiYyf31m+XlwdUZyur/jLLX\nypoX4b38QCwIYLpgmQ1lHDxhz2aRJv4VWnnv+IfgMPcN6Fi4uSFg4eLDBh6EXYHg\nSUskyuTLDCESQEPr/jRO6XIvWwKBgQDVlOJbyWrJX2HKjASpsXfZdNvE8SK35t4g\n2C/jkT3qeZvVFgZRmA2GHRhe72qxYhhLDY2zp51MeCry6K93L2d+hUw/iRLyybSV\n9+EYmhZdByadymiisI07gF9u+9RYuRwMCCf/NbZDmfTaK9vmpEdxlkJqpzhskyAV\nyhE65KtEzwKBgQCcW23CVTaKffpB5vjyC2sO624jHqMKmaRpFlgBPXnpdqpdxWJ3\nDBYqTIZkWd9UtMWx2NwkPCoXO36I71K/ypinT5759ic4hUuVXWF+40N2dF9G8qo5\nF3TEgi6HS+hcXShyvZVr5L65IheXtc1eXoAZbc9m8mHENxofCNlbuYCigwKBgQCY\niB+wlYQiFHBuiti5p/iD4KUjXWMCG2r/4eUxjIS/c+IKqBQTKZhe82B4TFvSGtBm\nnqWNNrqLz/c4OdIb7g2tSPDhcF7Tkl5DUmZa0TzcxcO3vOqLHrXbvy5pcVJUuV+Tj\n4t9NsDpexRDMzw3ZBfHP+ROtv4bYY6pCZXEwsiZumQKBgGjsiHH8GjHvVQpy+F/4\nrQwJEKs1uRO3FBPHxt2LpHKG7Oo33uJFnw819q/0QCmoQ7PHwy7msADwjdz633+b\nSMY/skfDTvzOMci2FiAu/IEiC/1PpADhSGxbr7ORHE9NTqgklxqUz6FIQ0r4CYpx\n0/+K/mhhqw/6C/YHvojjMR9m\n-----END PRIVATE KEY-----",
+            "private_key": "-----BEGIN PRIVATE KEY-----\n"
+                           "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDNpPMMsrUpidl4\n"
+                           "nEtOzaCWO8Jh5qil9kAU5JHfLs5RmqLIOvAof3WKeIuHkQWyRkZAghbi+0ktyTAx\n"
+                           "wLgWF/lcFBAz0HtF3IIURnWp2W2xpgA/qosSiJ6MUg9ZIQ0qKQzOxdX6+vUNG2M1\n"
+                           "ITq16sSlGgb4Sz0IDHiOneWfMtc77pKzi9eIqkKe3CWGzK+y47TCfKwadybBT0Ih\n"
+                           "V6OYbBCthHO9VldUJsAX1djrT8ePFj6D34Pdjb+rAxV9h6hxUT6pnYdhO2RDFRaE\n"
+                           "cOJAN7sMcRA2ru/OqLKBXcBwMZ9SOplQZ0xEQMbUiKCSEXsEdhskksXCvLfgu97i\n"
+                           "qOHFsXaVAgMBAAECggEAIgIDR7hOCV6Ink+KjK+ovO+JB9OzVC7TDiF2ligRaqFe\n"
+                           "BirpCGl7sLiaqoKrJH5Go+hfjI3t3iqFU9UBHHY+gKG4xDjYCgebY2r7jmksoNJI\n"
+                           "/D5h3WDGh4ISk7TJjo1XVuKUrnrOB6rdzy19nhQDDSKuwGUA5NHbJgqqrJclzP0t\n"
+                           "JCeezGResAGls+5PFJq+RqiQ8ZmLt7OxPzsbXAdjocajUVtlpyQ8H4IO2l3TRon7\n"
+                           "GyH5ldXoBS3MO06h6v87XjcpqyrM3oyqgASyR7OcmfTjjieRQUL3J8kelfzTpzgw\n"
+                           "HLLgGcpsGMDDeNjvEVHy5LZnDoRkLPa40+JV69WISQKBgQD2fIMl9O7/EsemGmKq\n"
+                           "zvjNtj90LCcY/JBhm0CJrIG6FmBlxnmSH3MMokzkaIiYyf31m+XlwdUZyur/jLLX\n"
+                           "ypoX4b38QCwIYLpgmQ1lHDxhz2aRJv4VWnnv+IfgMPcN6Fi4uSFg4eLDBh6EXYHg\n"
+                           "SUskyuTLDCESQEPr/jRO6XIvWwKBgQDVlOJbyWrJX2HKjASpsXfZdNvE8SK35t4g\n"
+                           "2C/jkT3qeZvVFgZRmA2GHRhe72qxYhhLDY2zp51MeCry6K93L2d+hUw/iRLyybSV\n"
+                           "9+EYmhZdByadymiisI07gF9u+9RYuRwMCCf/NbZDmfTaK9vmpEdxlkJqpzhskyAV\n"
+                           "yhE65KtEzwKBgQCcW23CVTaKffpB5vjyC2sO624jHqMKmaRpFlgBPXnpdqpdxWJ3\n"
+                           "DBYqTIZkWd9UtMWx2NwkPCoXO36I71K/ypinT5759ic4hUuVXWF+40N2dF9G8qo5\n"
+                           "F3TEgi6HS+hcXShyvZVr5L65IheXtc1eXoAZbc9m8mHENxofCNlbuYCigwKBgQCY\n"
+                           "iB+wlYQiFHBuiti5p/iD4KUjXWMCG2r/4eUxjIS/c+IKqBQTKZhe82B4TFvSGtBm\n"
+                           "nqWNNrqLz/c4OdIb7g2tSPDhcF7Tkl5DUmZa0TzcxcO3vOqLHrXbvy5pcVJUuV+Tj\n"
+                           "4t9NsDpexRDMzw3ZBfHP+ROtv4bYY6pCZXEwsiZumQKBgGjsiHH8GjHvVQpy+F/4\n"
+                           "rQwJEKs1uRO3FBPHxt2LpHKG7Oo33uJFnw819q/0QCmoQ7PHwy7msADwjdz633+b\n"
+                           "SMY/skfDTvzOMci2FiAu/IEiC/1PpADhSGxbr7ORHE9NTqgklxqUz6FIQ0r4CYpx\n"
+                           "0/+K/mhhqw/6C/YHvojjMR9m\n"
+                           "-----END PRIVATE KEY-----",
             "client_email": "bombeiro-app@stock-bombeiros.iam.gserviceaccount.com",
             "client_id": "102395152982852761363",
             "auth_uri": "https://accounts.google.com/o/oauth2/auth",
@@ -46,9 +73,8 @@ def obter_cliente_gsheets():
         creds = Credentials.from_service_account_info(creds_dict, scopes=escopos)
         return gspread.authorize(creds)
     except Exception as e:
-        st.error(f"Erro na autenticação: {e}")
+        st.error(f"Erreur d'authentification : {e}")
         return None
-
 def carregar_dados_seguro():
     try:
         cliente = obter_cliente_gsheets()
