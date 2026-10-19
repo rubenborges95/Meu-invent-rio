@@ -1,10 +1,10 @@
-import streamlit as st
-import pandas as pd
 from datetime import datetime
 import os
 from gspread.exceptions import WorksheetNotFound
+import pandas as pd
+import streamlit as st
 
-# Configuração da página (DEVE SER A PRIMEIRA COISA DO STREAMLIT)
+# Configuração da página
 st.set_page_config(page_title="AMBULANCE LOG", page_icon="🚑", layout="centered")
 
 # Estilo CSS
@@ -20,7 +20,6 @@ st.markdown(
 )
 
 
-# Ligação direta através do ficheiro credentials.json no repositório
 @st.cache_resource
 def obter_cliente_gsheets():
   import gspread
@@ -31,13 +30,19 @@ def obter_cliente_gsheets():
       "https://www.googleapis.com/auth/drive",
   ]
   try:
+    if not os.path.exists("credentials.json"):
+      st.error(
+          "Ficheiro 'credentials.json' não encontrado na pasta do repositório!"
+      )
+      return None
+
     creds = Credentials.from_service_account_file(
         "credentials.json", scopes=escopos
     )
     cliente = gspread.authorize(creds)
     return cliente
   except Exception as e:
-    st.error(f"Erro ao carregar o ficheiro credentials.json: {e}")
+    st.error(f"Erro crítico no credentials.json: {e}")
     return None
 
 
@@ -46,12 +51,11 @@ def abrir_tabela():
     cliente = obter_cliente_gsheets()
     if not cliente:
       return None
-    # Põe aqui o link direto da tua folha de cálculo entre as aspas
     url = "https://docs.google.com/spreadsheets/d/1cxL--ifJ-2GGWeNFUA2k-g0TLbOVdPFzGQ-i6UJrYiA/edit?gid=0#gid=0"
     sh = cliente.open_by_url(url)
     return sh
   except Exception as e:
-    st.error(f"Erro ao abrir folha: {e}")
+    st.error(f"Erro ao abrir o link do Google Sheets: {e}")
     return None
 
 
@@ -74,6 +78,10 @@ def carregar_materiais():
     df["limite_minimo"] = df["limite_minimo"].astype(int)
     return df
   except Exception as e:
+    st.warning(
+        "Aviso: A aba 'materiais' não foi encontrada ou está vazia na folha"
+        " Excel."
+    )
     return pd.DataFrame(
         columns=["id", "nome", "quantidade", "categoria", "limite_minimo"]
     )
@@ -180,7 +188,10 @@ with aba_inventario:
   )
 
   if df_materiais.empty:
-    st.info("Nenhum material registado no sistema.")
+    st.info(
+        "Nenhum material carregado (verifique se a folha Google tem as abas"
+        " 'materiais' e 'historico')."
+    )
   else:
     for _, row in df_materiais.iterrows():
       id_m = int(row["id"])
