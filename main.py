@@ -1,11 +1,12 @@
 from datetime import datetime
 import pandas as pd
 import streamlit as st
+from st_gsheets_connection import GSheetsConnection
 
-# Configuração da página para telemóvel e tema escuro
+# Configuração da página
 st.set_page_config(page_title="AMBULANCE LOG", page_icon="🚑", layout="centered")
 
-# Estilização do Tema Pré-Hospitalar (CSS)
+# Estilo CSS
 st.markdown(
     """
     <style>
@@ -17,18 +18,14 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Obter a ligação ao Google Sheets através dos Secrets configurados
-# No painel do Streamlit Cloud em Secrets deves ter:
-# [connections.gsheets]
-# spreadsheet = "O_TEU_LINK_DO_GOOGLE_SHEETS"
+# Inicializar a ligação ao Google Sheets de forma segura
 try:
-  conn = st.connection("gsheets", type="gsheets")
-except Exception:
-  # Fallback caso a ligação direta precise de formato URL puro nos secrets
-  pass
+  conn = st.connection("gsheets", type=GSheetsConnection)
+except Exception as e:
+  st.error(f"Erro ao inicializar a ligação ao Google Sheets: {e}")
 
 
-# Funções para ler e escrever no Google Sheets
+# Funções de leitura e escrita seguras
 def carregar_materiais():
   try:
     df = conn.read(worksheet="materiais", ttl=0)
@@ -40,14 +37,18 @@ def carregar_materiais():
     df["quantidade"] = df["quantidade"].astype(int)
     df["limite_minimo"] = df["limite_minimo"].astype(int)
     return df
-  except:
+  except Exception as e:
+    st.error(f"Erro ao ler materiais: {e}")
     return pd.DataFrame(
         columns=["id", "nome", "quantidade", "categoria", "limite_minimo"]
     )
 
 
 def guardar_materiais(df):
-  conn.update(worksheet="materiais", data=df)
+  try:
+    conn.update(worksheet="materiais", data=df)
+  except Exception as e:
+    st.error(f"Erro ao guardar materiais: {e}")
 
 
 def carregar_historico():
@@ -77,20 +78,23 @@ def carregar_historico():
 
 
 def registar_historico(material, tipo_acao, qtd_alt, qtd_final):
-  df_hist = carregar_historico()
-  agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-  novo_reg = pd.DataFrame([{
-      "data_hora": agora,
-      "material": material,
-      "tipo_acao": tipo_acao,
-      "quantidade_alterada": int(qtd_alt),
-      "quantidade_final": int(qtd_final),
-  }])
-  df_atualizado = pd.concat([df_hist, novo_reg], ignore_index=True)
-  conn.update(worksheet="historico", data=df_atualizado)
+  try:
+    df_hist = carregar_historico()
+    agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    novo_reg = pd.DataFrame([{
+        "data_hora": agora,
+        "material": material,
+        "tipo_acao": tipo_acao,
+        "quantidade_alterada": int(qtd_alt),
+        "quantidade_final": int(qtd_final),
+    }])
+    df_atualizado = pd.concat([df_hist, novo_reg], ignore_index=True)
+    conn.update(worksheet="historico", data=df_atualizado)
+  except Exception as e:
+    st.error(f"Erro ao registar histórico: {e}")
 
 
-# --- BLOCO DO TOPO: EMBLEMA + TEXTO LADO A LADO ---
+# --- Cabeçalho ---
 col_logo, col_titulo = st.columns([1, 3])
 
 with col_logo:
@@ -107,13 +111,11 @@ with col_titulo:
   )
 
 st.caption("Gestão de Stock Material Pré-Hospitalar")
-# ------------------------------------------------------
 
 aba_inventario, aba_registo, aba_historico = st.tabs(
     ["📦 Inventário Ativo", "➕ Registar Novo", "📋 Ocorrências"]
 )
 
-# Carregar dados atuais
 df_materiais = carregar_materiais()
 
 # --- ABA 1: INVENTÁRIO ATIVO ---
