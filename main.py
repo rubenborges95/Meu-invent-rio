@@ -54,6 +54,10 @@ def carregar_materiais():
     ws = sh.worksheet("materiais")
     dados = ws.get_all_records()
     df = pd.DataFrame(dados)
+
+    # Limpa linhas vazias que venham do Google Sheets
+    df = df.dropna(subset=["id", "nome"])
+
     if df.empty or "id" not in df.columns:
       return pd.DataFrame(
           columns=["id", "nome", "quantidade", "categoria", "limite_minimo"]
@@ -62,7 +66,8 @@ def carregar_materiais():
     df["quantidade"] = df["quantidade"].astype(int)
     df["limite_minimo"] = df["limite_minimo"].astype(int)
     return df
-  except Exception:
+  except Exception as e:
+    st.error(f"Erro ao ler os dados: {e}")
     return pd.DataFrame(
         columns=["id", "nome", "quantidade", "categoria", "limite_minimo"]
     )
