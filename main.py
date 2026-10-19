@@ -57,7 +57,7 @@ rQwJEKs1uRO3FBPHxt2LpHKG7Oo33uJFnw819q/0QCmoQ7PHwy7msADwjdz633+b
 SMY/skfDTvzOMci2FiAu/IEiC/1PpADhSGxbr7ORHE9NTqgklxqUz6FIQ0r4CYpx
 0/+K/mhhqw/6C/YHvojjMR9m
 -----END PRIVATE KEY-----""",
-            "client_email": "bombeiros-app@stock-bombeiros.iam.gserviceaccount.com",
+            "client_email": "bombeiro-app@stock-bombeiros.iam.gserviceaccount.com",
             "client_id": "102395152982852761363",
             "auth_uri": "https://accounts.google.com/o/oauth2/auth",
             "token_uri": "https://oauth2.googleapis.com/token",
