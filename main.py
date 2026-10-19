@@ -20,34 +20,35 @@ st.markdown(
 
 @st.cache_resource
 def obter_cliente_gsheets():
-    import json
     import gspread
     from google.oauth2.service_account import Credentials
     
     try:
-        diretorio_atual = os.path.dirname(os.path.abspath(__file__))
-        caminho_json = os.path.join(diretorio_atual, "credentials.json")
-        if not os.path.exists(caminho_json):
-            st.error(f"Ficheiro 'credentials.json' não encontrado em: {caminho_json}")
+        if "gcp_service_account" not in st.secrets:
+            st.error("As credenciais 'gcp_service_account' não estão configuradas nos Secrets do Streamlit.")
             return None
             
-        with open(caminho_json, "r", encoding="utf-8") as f:
-            creds_dict = json.load(f)
-            
-        if "private_key" in creds_dict:
-            # Corrige de forma universal qualquer tipo de quebra de linha corrompida
-            pk = creds_dict["private_key"]
+        # Copia os segredos para um dicionário limpo
+        secrets_dict = dict(st.secrets["gcp_service_account"])
+        
+        # Tratamento agressivo e universal da chave privada para eliminar o erro de JWT
+        if "private_key" in secrets_dict:
+            pk = str(secrets_dict["private_key"])
+            # Substitui qualquer variação de quebra de linha escapada por uma real
             pk = pk.replace("\\\\n", "\n").replace("\\n", "\n")
-            creds_dict["private_key"] = pk
-            
+            # Garante que os limites da chave estão corretos
+            pk = pk.strip()
+            secrets_dict["private_key"] = pk
+        
         escopos = [
             "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive"
         ]
-        creds = Credentials.from_service_account_info(creds_dict, scopes=escopos)
+        
+        creds = Credentials.from_service_account_info(secrets_dict, scopes=escopos)
         return gspread.authorize(creds)
     except Exception as e:
-        st.error(f"Erro detalhado na autenticação Google: {e}")
+        st.error(f"Erro crítico na autenticação Google: {e}")
         return None
 
 
