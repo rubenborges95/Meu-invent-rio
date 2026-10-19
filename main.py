@@ -1,7 +1,7 @@
 from datetime import datetime
 import pandas as pd
 import streamlit as st
-from streamlit_gsheets import GSheetsConnection
+from st_gsheets_connection import GSheetsConnection
 
 # Configuração da página para telemóvel e tema escuro
 st.set_page_config(page_title="AMBULANCE LOG", page_icon="🚑", layout="centered")
