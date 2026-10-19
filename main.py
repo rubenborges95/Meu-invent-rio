@@ -28,16 +28,19 @@ def obter_cliente_gsheets():
             st.error("As credenciais 'gcp_service_account' não estão configuradas nos Secrets do Streamlit.")
             return None
             
-        # Copia os segredos para um dicionário limpo
         secrets_dict = dict(st.secrets["gcp_service_account"])
         
-        # Tratamento agressivo e universal da chave privada para eliminar o erro de JWT
         if "private_key" in secrets_dict:
             pk = str(secrets_dict["private_key"])
-            # Substitui qualquer variação de quebra de linha escapada por uma real
-            pk = pk.replace("\\\\n", "\n").replace("\\n", "\n")
-            # Garante que os limites da chave estão corretos
-            pk = pk.strip()
+            pk = pk.replace("\\n", "\n")
+            
+            # Se a chave perdeu as quebras de linha e ficou numa linha única, reconstruímos o PEM
+            if "-----BEGIN PRIVATE KEY-----" in pk and "-----END PRIVATE KEY-----" in pk:
+                corpo = pk.replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "")
+                corpo = "".join(corpo.split())  # Remove espaços e quebras inválidas
+                linhas_corpo = [corpo[i:i+64] for i in range(0, len(corpo), 64)]
+                pk = "-----BEGIN PRIVATE KEY-----\n" + "\n".join(linhas_corpo) + "\n-----END PRIVATE KEY-----\n"
+            
             secrets_dict["private_key"] = pk
         
         escopos = [
