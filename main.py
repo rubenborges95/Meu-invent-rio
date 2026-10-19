@@ -1,6 +1,7 @@
 from datetime import datetime
 import pandas as pd
 import streamlit as st
+from st_gsheets_connection import GSheetsConnection
 
 # Configuração da página
 st.set_page_config(page_title="AMBULANCE LOG", page_icon="🚑", layout="centered")
@@ -17,9 +18,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Ligar ao Google Sheets de forma nativa (sem pacotes externos no código)
+# Ligar ao Google Sheets de forma segura
 try:
-  conn = st.connection("gsheets", type="gsheets")
+  conn = st.connection("gsheets", type=GSheetsConnection)
 except Exception as e:
   st.error(f"Erro na ligação ao Google Sheets: {e}")
 
