@@ -20,16 +20,23 @@ st.markdown(
 @st.cache_resource
 def obter_cliente_gsheets():
     import gspread
+    import os
     from google.oauth2.service_account import Credentials
     
     try:
-        creds_dict = dict(st.secrets["gsheets"])
-        
-        # Limpa automaticamente quaisquer espaços excessivos ou quebras indesejadas na chave
-        if "private_key" in creds_dict:
-            chave_limpa = creds_dict["private_key"].strip()
-            # Se o Streamlit colou com espaços a mais, normaliza
-            creds_dict["private_key"] = chave_limpa.replace("\\n", "\n")
+        # Lê as credenciais diretamente das Variáveis de Ambiente do Render
+        creds_dict = {
+            "type": "service_account",
+            "project_id": "stock-bombeiros",
+            "private_key_id": os.getenv("GOOGLE_PRIVATE_KEY_ID", "ee3317924b8f107e0290fc00742d1ee82273094e"),
+            "private_key": os.getenv("GOOGLE_PRIVATE_KEY", "").replace("\\n", "\n"),
+            "client_email": os.getenv("GOOGLE_CLIENT_EMAIL", "bombeiros-app@stock-bombeiros.iam.gserviceaccount.com"),
+            "client_id": os.getenv("GOOGLE_CLIENT_ID", "102395152982852761363"),
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/bombeiros-app%40stock-bombeiros.iam.gserviceaccount.com"
+        }
             
         escopos = [
             "https://www.googleapis.com/auth/spreadsheets",
