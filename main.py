@@ -23,9 +23,12 @@ def obter_cliente_gsheets():
     from google.oauth2.service_account import Credentials
     
     try:
-        # Lê as credenciais diretamente do gestor seguro do Streamlit Cloud
         creds_dict = dict(st.secrets["gsheets"])
         
+        # Converte as quebras de linha em formato texto para quebras reais de segurança
+        if "private_key" in creds_dict:
+            creds_dict["private_key"] = creds_dict["private_key"].replace("\\n", "\n")
+            
         escopos = [
             "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive"
@@ -206,59 +209,4 @@ with aba_registo:
                     "limite_minimo": limite_novo,
                 }])
 
-                df_materiais = pd.concat([df_materiais, novo_registo], ignore_index=True)
-                guardar_materiais(df_materiais)
-                registar_historico(nome_novo, "Registo Inicial", qtd_nova, qtd_nova)
-
-                st.success(f"'{nome_novo}' adicionado com sucesso!")
-                st.rerun()
-            else:
-                st.warning("Preenche o nome do material.")
-
-# --- ABA 3: HISTÓRICO E APAGAR ---
-with aba_historico:
-    st.subheader("📋 Relatório de Movimentações")
-
-    if not df_historico.empty:
-        df_hist_display = df_historico.rename(
-            columns={
-                "data_hora": "Data/Hora",
-                "material": "Material",
-                "tipo_acao": "Ação",
-                "quantidade_alterada": "Qtd Mod.",
-                "quantidade_final": "Stock Final",
-            }
-        )
-        st.dataframe(
-            df_hist_display.tail(50).sort_index(ascending=False),
-            use_container_width=True,
-            hide_index=True,
-        )
-    else:
-        st.info("Sem histórico registado.")
-
-    st.markdown("---")
-    st.subheader("🗑️ Abate / Apagar Material do Sistema")
-
-    if df_materiais.empty:
-        st.caption("Não há materiais para eliminar.")
-    else:
-        opcoes = {
-            f"{row['nome']} (ID: {row['id']})": row["id"]
-            for _, row in df_materiais.iterrows()
-        }
-        produto_selecionado = st.selectbox(
-            "Selecione o material que deseja apagar permanentemente:",
-            list(opcoes.keys()),
-        )
-
-        if st.button("🗑️ APAGAR PRODUTO SELECIONADO", type="primary"):
-            id_eliminar = opcoes[produto_selecionado]
-            nome_produto = df_materiais.loc[df_materiais["id"] == id_eliminar, "nome"].values[0]
-
-            df_materiais = df_materiais[df_materiais["id"] != id_eliminar]
-            guardar_materiais(df_materiais)
-            registar_historico(nome_produto, "Abate Total", 0, 0)
-
-            st.success(f"'{nome_produto}' foi removido do inventário!")
-            st.rerun()
+                df_materiais
