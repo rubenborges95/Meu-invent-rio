@@ -218,4 +218,21 @@ with aba_registo:
                     "limite_minimo": limite_novo,
                 }])
 
-                df_materiais
+                df_materiais = pd.concat([df_materiais, novo_registo], ignore_index=True)
+                guardar_materiais(df_materiais)
+                registar_historico(nome_novo, "Novo Material Adicionado", qtd_nova, qtd_nova)
+                
+                st.success(f"Material '{nome_novo}' registado com sucesso!")
+                st.rerun()
+            else:
+                st.error("Por favor, preencha a designação do material.")
+
+# --- ABA 3: OCORRÊNCIAS ---
+with aba_historico:
+    st.subheader("📋 Histórico de Movimentos e Ocorrências")
+    if df_historico.empty:
+        st.info("Ainda não existem registos de histórico.")
+    else:
+        st.dataframe(df_historico, use_container_width=True)
+        if st.button("🔄 Atualizar Histórico"):
+            st.rerun()
