@@ -25,9 +25,11 @@ def obter_cliente_gsheets():
     try:
         creds_dict = dict(st.secrets["gsheets"])
         
-        # Converte as quebras de linha em formato texto para quebras reais de segurança
+        # Limpa automaticamente quaisquer espaços excessivos ou quebras indesejadas na chave
         if "private_key" in creds_dict:
-            creds_dict["private_key"] = creds_dict["private_key"].replace("\\n", "\n")
+            chave_limpa = creds_dict["private_key"].strip()
+            # Se o Streamlit colou com espaços a mais, normaliza
+            creds_dict["private_key"] = chave_limpa.replace("\\n", "\n")
             
         escopos = [
             "https://www.googleapis.com/auth/spreadsheets",
