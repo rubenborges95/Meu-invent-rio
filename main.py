@@ -49,6 +49,7 @@ def obter_cliente_gsheets():
         st.error(f"Erro de autenticação: {e}")
         return None
 
+@st.cache_data(ttl=60, show_spinner=False)
 def carregar_dados_seguro():
     try:
         cliente = obter_cliente_gsheets()
@@ -96,6 +97,7 @@ def guardar_materiais(df):
         ws.clear()
         dados_para_escrever = [df.columns.tolist()] + df.values.tolist()
         ws.update(values=dados_para_escrever, range_name="A1")
+        st.cache_data.clear() # Limpa a cache para refletir as alterações imediatamente
     except Exception as e:
         st.error(f"Erro ao guardar materiais: {e}")
 
@@ -110,6 +112,7 @@ def registar_historico(material, tipo_acao, qtd_alt, qtd_final):
         ws = sh.worksheet("historico")
         agora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         ws.append_row([agora, str(material), str(tipo_acao), int(qtd_alt), int(qtd_final)])
+        st.cache_data.clear()
     except Exception:
         pass
 
@@ -135,7 +138,7 @@ aba_inventario, aba_registo, aba_historico = st.tabs(
     ["📦 Inventário Ativo", "➕ Registar Novo", "📋 Ocorrências"]
 )
 
-# Carregamento único e seguro de dados
+# Carregamento único e seguro de dados com cache
 df_materiais, df_historico = carregar_dados_seguro()
 
 # --- ABA 1: INVENTÁRIO ATIVO ---
@@ -145,8 +148,13 @@ with aba_inventario:
     if df_materiais.empty:
         st.warning("A folha de cálculo está vazia ou sem ligação válida.")
         if st.button("🔄 Atualizar Dados"):
+            st.cache_data.clear()
             st.rerun()
     else:
+        if st.button("🔄 Atualizar Dados"):
+            st.cache_data.clear()
+            st.rerun()
+            
         for _, row in df_materiais.iterrows():
             id_m = int(row["id"])
             nome = str(row["nome"])
@@ -235,4 +243,5 @@ with aba_historico:
     else:
         st.dataframe(df_historico, use_container_width=True)
         if st.button("🔄 Atualizar Histórico"):
+            st.cache_data.clear()
             st.rerun()
